@@ -1,11 +1,15 @@
 require "pp"
-HEADERS = [:link, :name, :year, :country, :date, :genre, :duration, :rating, :author, :actors].freeze
+HEADERS = %i[link name year country date genre duration rating author actors].freeze
 
 file_path = './data/movies.txt'
 
 lines = File.readlines(file_path)
 films = lines.map { |obj| HEADERS.zip(obj.split('|')).to_h }
 sort = films.select { |obj| obj[:name].include?('Max') }
+
+def print_result(obj)
+  obj.each { |value| puts "#{value[:name]} (#{value[:date]}; #{value[:genre]}) - #{value[:duration]}" }
+end
 
 puts "================================================="
 
@@ -17,17 +21,16 @@ end
 puts "================================================="
 
 the_longests = films.sort_by { |film| film[:duration].to_i }.reverse.take(5)
-the_longests.each { |value| puts "#{value[:name]} (#{value[:date]}; #{value[:genre]}) - #{value[:duration]}" }
+print_result(the_longests)
 
 puts "================================================="
 
 comedy = films.select { |value| value[:genre].include?('Comedy')}.sort_by{ |value| value[:date] }
-comedy.each { |value| puts "#{value[:name]} (#{value[:date]}; #{value[:genre]}) - #{value[:duration]}" }
+print_result(comedy)
 
 puts "================================================="
 
-authors = films.sort_by { |value| value[:author].split(" ").last }.uniq { |value| value[:author] }
-authors.each { |value| puts value[:author] }
+films.map { |value| value[:author] }.sort_by { |name| name.split(" ").last }.uniq.each { |name| puts name }
 
 puts "================================================="
 
