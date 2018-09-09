@@ -1,10 +1,12 @@
-require "pp"
+require 'pp'
+require 'csv'
+require 'ostruct'
+require 'date'
+
 HEADERS = %i[link name year country date genre duration rating author actors].freeze
 
-file_path = './data/movies.txt'
+films = CSV.foreach('./data/movies.txt', headers: HEADERS, col_sep: "|").map { |row| OpenStruct.new(row.to_h) }
 
-lines = File.readlines(file_path)
-films = lines.map { |obj| HEADERS.zip(obj.split('|')).to_h }
 sort = films.select { |obj| obj[:name].include?('Max') }
 
 def print_result(obj)
@@ -25,14 +27,19 @@ print_result(the_longests)
 
 puts "================================================="
 
-comedy = films.select { |value| value[:genre].include?('Comedy')}.sort_by{ |value| value[:date] }
+comedy = films.select { |value| value[:genre].include?('Comedy')}.sort_by(&:date)
 print_result(comedy)
 
 puts "================================================="
 
-films.map { |value| value[:author] }.sort_by { |name| name.split(" ").last }.uniq.each { |name| puts name }
+films.map(&:author).sort_by { |name| name.split(" ").last }.uniq.each { |name| puts name }
 
 puts "================================================="
 
 movies_shot_not_us = films.count { |value| value[:country] != 'USA' }
 puts movies_shot_not_us
+
+puts "================================================="
+
+dates = films.delete_if { |obj| obj.date.length < 7 }.map { |value| Date.strptime(value.date, "%Y-%m").mon }.group_by { |value| value }
+dates.sort.each { |key, value| puts "#{Date::MONTHNAMES[key]}: #{value.count} movies" }
