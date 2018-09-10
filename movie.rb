@@ -41,5 +41,5 @@ puts movies_shot_not_us
 
 puts "================================================="
 
-dates = films.delete_if { |obj| obj.date.length < 7 }.map { |value| Date.strptime(value.date, "%Y-%m").mon }.group_by { |value| value }
+dates = films.map(&:date).delete_if { |obj| obj.length < 7 }.map { |value| Date.strptime(value, "%Y-%m").mon }.group_by(&:itself)
 dates.sort.each { |key, value| puts "#{Date::MONTHNAMES[key]}: #{value.count} movies" }
